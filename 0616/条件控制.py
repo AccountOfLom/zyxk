@@ -11,7 +11,7 @@ else:
 # 注意父子级的关系，子级相对父级要缩进4个空格
 # if account == "正确的账号":
 #     if account == "正确的账号" and password == "正确的密码":
-#         print("登录成功，并且跳转到主页")
+#         print("登录成功，并且跳转 到主页")
 #     else:
 #         print("登录失败，留在登录页面")
 # else:
