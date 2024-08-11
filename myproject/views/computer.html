@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>电脑列表</title>
+	<link rel="stylesheet" href="https://cdn.staticfile.net/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://cdn.staticfile.net/jquery/2.1.1/jquery.min.js"></script>
+	<script src="https://cdn.staticfile.net/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body style="width:1000px;padding-left: 200px;">
+<div>
+	<a href="./computerAdd.html">
+		<button style="float:right;margin-top:20px;">添加</button>
+	</a>
+</div>
+<table class="table table-bordered">
+	<caption>电脑列表</caption>
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>系统版本</th>
+			<th>备注</th>
+			<th>创建时间</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	</tbody>
+</table>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h4 class="modal-title" id="myModalLabel">
+					编辑信息
+				</h4>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" name="id" id="model-inp-id">
+				<div class="form-group">
+					<label for="model-inp-sv">系统版本</label>
+					<input type="text" name="sv" class="form-control" id="model-inp-sv" placeholder="请输入系统版本">
+				</div>
+				<div class="form-group">
+					<label for="model-inp-notes">备注</label>
+					<input type="text" name="notes" class="form-control" id="model-inp-notes" placeholder="请输入备注信息">
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">
+					关闭
+				</button>
+				<button onclick="edit()" type="button" class="btn btn-primary">
+					提交更改
+				</button>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+</div>
+</body>
+</html>
+<script>
+	// 通常意义上来说：客户端就是前端，python服务端，是后端
+	// 通过 javascript 来调用后端接口
+
+	$.ajax({
+		"url":"http://127.0.0.1:5000/computer",
+		"type":"GET",
+		success:function(rep) {
+			console.log(rep)
+			// 把从python 后端获取的 json 字符串转为 json对象
+			var jsonObject = JSON.parse(rep)
+			for (var i in jsonObject) {
+				var computer = jsonObject[i]
+				console.log(jsonObject[i])
+				$('tbody').append("<tr>\n" +
+						"<td class='computer-id'>"+ computer.id +"</td>\n" +
+						"<td  class='computer-sv'>"+ computer.system_version +"</td>\n" +
+						"<td  class='computer-notes'>"+ computer.notes +"</td>\n" +
+						"<td>"+ computer.created_at +"</td>\n" +
+						"<td><button onclick='showModel(this)' class='action' data-toggle='modal' data-target='#myModal'>编辑</button><button class='action'>删除</button></td>\n" +
+						"</tr>");
+				}
+		}
+	});
+
+	//显示模态框
+	function showModel(obj)
+	{
+		// 通过HTML元素的层级，找数据
+		var id = $(obj).parent().parent().find('.computer-id').text()
+		$('#model-inp-id').val(id);
+		//从 table 表中读取系统版本，并填充到模态框
+		var sv = $(obj).parent().parent().find('.computer-sv').text()
+		$('#model-inp-sv').val(sv);
+		//从 table 表中读取备注信息，，并填充到模态框
+		var notes = $(obj).parent().parent().find('.computer-notes').text()
+		$('#model-inp-notes').val(notes);
+	}
+
+	//编辑操作
+	function edit()
+	{
+		//从模态框取出输入的数据
+		var id = $('#model-inp-id').val();
+		var sv = $('#model-inp-sv').val();
+		var notes = $('#model-inp-notes').val();
+
+		// ajax 是js的一种发起http请求的方法
+		$.ajax({
+			"url":"http://127.0.0.1:5000/computer", //请求地址
+			"type":"put",  // http 请求方式，需按后端所定义的来
+			"data":{"id":id,"sv":sv,"notes":notes}, //json 数据格式，json也是很常用的，前后端做数据交互的格式
+			success:function(rep) {
+				// success 是 ajax 请求的成功回调方法，后端接口有返回数据时，success会自动执行
+				console.log("后端响应:" + rep)
+				// 将json字符串，解析为 json 对象
+				var jsonObject = JSON.parse(rep)
+				if (jsonObject.status == 1) {
+					alert(jsonObject.msg);
+					// 刷新当前页面
+					location.reload()
+				}
+			},
+			error:function(err) {
+				// 前后端数据交互不成功时，会自定执行
+				alert("请求失败");
+			}
+		});
+	}
+
+</script>
