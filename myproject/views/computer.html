@@ -9,6 +9,9 @@
 </head>
 <body style="width:1000px;padding-left: 200px;">
 <div>
+	<a href="./index.html">
+		<button style="float:right;margin-top:20px;">返回</button>
+	</a>
 	<a href="./computerAdd.html">
 		<button style="float:right;margin-top:20px;">添加</button>
 	</a>
@@ -81,11 +84,32 @@
 						"<td  class='computer-sv'>"+ computer.system_version +"</td>\n" +
 						"<td  class='computer-notes'>"+ computer.notes +"</td>\n" +
 						"<td>"+ computer.created_at +"</td>\n" +
-						"<td><button onclick='showModel(this)' class='action' data-toggle='modal' data-target='#myModal'>编辑</button><button class='action'>删除</button></td>\n" +
+						"<td><button onclick='showModel(this)' class='action' data-toggle='modal' data-target='#myModal'>编辑</button>" +
+						"<button onclick='del("+ computer.id +", this)' class='action'>删除</button></td>\n" +
 						"</tr>");
 				}
 		}
 	});
+
+	// 删除操作
+	function del(id, obj)
+	{
+		$.ajax({
+			"url":"http://127.0.0.1:5000/computer", //请求地址
+			"type":"delete",  // http 请求方式，需按后端所定义的来
+			"data":{"id":id}, //json 数据格式，json也是很常用的，前后端做数据交互的格式
+			success:function(rep) {
+				// success 是 ajax 请求的成功回调方法，后端接口有返回数据时，success会自动执行
+				console.log("后端响应:" + rep)
+				//通过按钮元素，找所属的行，再执行删除
+				$(obj).parent().parent().remove(); 
+			},
+			error:function(err) {
+				// 前后端数据交互不成功时，会自定执行
+				alert("请求失败");
+			}
+		});
+	}
 
 	//显示模态框
 	function showModel(obj)

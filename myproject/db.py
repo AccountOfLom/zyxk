@@ -35,6 +35,9 @@ class db:
         # 执行查询
         obj.execute(sql)
         data = obj.fetchall()
+        # 关闭连接
+        obj.close()
+        self.query.close()
 
         # obj.description 获取列名(字段名)
         # 通过 for in 将字段遍历给 columns
@@ -80,6 +83,9 @@ class db:
         obj.execute(sql)
         # 提交更改
         self.query.commit()
+        # 关闭连接
+        obj.close()
+        self.query.close()
 
 
     # 更新数据
@@ -90,6 +96,9 @@ class db:
         query.execute(sql)
         # 提交更改，确认执行
         self.query.commit()
+        # 关闭连接
+        query.close()
+        self.query.close()
 
     # 删除数据
     def delete(self, sql):
@@ -99,3 +108,6 @@ class db:
         query.execute(sql)
         # 提交更改，确认执行
         self.query.commit()
+        # 关闭连接
+        query.close()
+        self.query.close()

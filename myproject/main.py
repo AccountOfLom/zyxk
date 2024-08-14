@@ -4,6 +4,7 @@ import json
 import dateTimeEncoder
 from flask_cors import CORS
 import datetime
+import time
 
 app = Flask(__name__)
 # 允许跨域请求
@@ -89,6 +90,24 @@ def computerEdit():
     return json_data
 
 
+
+# 电脑删除接口
+@app.delete("/computer") # 此接口只接受HTTP delete 请求
+def computerDel():
+    # 获取参数
+    id = request.form.get('id') # 所编辑的电脑的ID
+
+    # 获取 db 数据库执行对象
+    # 组装字符串sql， sql 就是操作数据库的命令
+    sql = f"delete from computers where id = {id}"
+    query = db.db()
+    query.delete(sql)
+    # 返回了一个 json 数据（这里的json，是一个约定的数据格式），通知客户端处理结果
+    json_data = json.dumps({"status":1, "msg":"操作成功"})
+    return json_data
+
+
+
 # 添加人员的接口，在这个接口，需要接收客户端提交的参数(人员信息)，而后写入到数据库
 @app.post("/member") # 此接口只接受 post 请求
 def memberAdd():
@@ -135,5 +154,46 @@ def memberDel():
     query.delete(sql)
     # 返回了一个 json 数据（这里的json，是一个约定的数据格式），通知客户端处理结果
     json_data = json.dumps({"status":1, "msg":"操作成功"})
+    return json_data
+
+
+# 编辑接口
+@app.get("/history") # 此接口只接受 delete 请求
+def history():
+    # 获取参数
+    mid = request.args.get('mid')
+    cid = request.args.get('cid')
+    domain = request.args.get('domain')
+    title = request.args.get('title')
+    #当前时间
+    now = int(time.time())
+
+    # 写入浏览记录之前，要先查一下，这个域名的最新记录end_time值
+    # end_time距离当前时间有没有超过5秒，超过了就是新增一条浏览记录，否则就更新end_time
+
+    query = db.db()
+    sql = f"select * from history where cid = '{cid}' and domain = '{domain}' order by id desc"
+    data = query.getOne(sql)  # 这个方法得到的是一个字典
+    # 浏览历史不存在，或距离上一次浏览记录超过了5秒，则写入一条新记录
+    if data is None or now - data['end_time'] > 5:
+        data = {
+            "mid": mid,
+            "cid": cid,
+            "domain": domain,
+            "title": title,
+            "start_time": now,
+            "end_time": now,
+            "date": datetime.datetime.now().strftime('%Y-%m-%d')
+        }
+        # 获取 db 数据库执行对象
+        query = db.db()
+        # 写入数据
+        query.add("history", data)
+    else:
+        sql = f"update history set end_time = '{now}' where id = {data['id']}"
+        query = db.db()
+        query.update(sql)
+
+    json_data = json.dumps({"status": 1, "msg": "执行成功"})
     return json_data
 
