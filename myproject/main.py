@@ -197,3 +197,13 @@ def history():
     json_data = json.dumps({"status": 1, "msg": "执行成功"})
     return json_data
 
+
+# 获取统计图表数据
+@app.get("/chart-data") # 接口地址，两个单词组成时，可以用 ‘—’ 拼接
+def chartData():
+    sql = 'select domain, title, SUM(end_time - start_time) as total_time from history GROUP BY domain';
+    query = db.db()
+    data = query.getAll(sql)
+    json_data = json.dumps(data)
+    return json_data
+

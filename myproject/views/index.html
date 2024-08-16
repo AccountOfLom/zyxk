@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index</title>
+    <!-- 引入 echarts.js -->
+    <script src="https://cdn.staticfile.net/echarts/4.3.0/echarts.min.js"></script>
+    <script src="https://cdn.staticfile.net/jquery/2.1.1/jquery.min.js"></script>
+</head>
+<body style="width:800px;">
+    <div>
+        <a href="./computer.html">
+            <button style="float:right;margin-top:20px;">查看电脑</button>
+        </a>
+        <a href="./member.html">
+            <button style="float:right;margin-top:20px;">查看人员</button>
+        </a>
+    </div>
+    <center>
+        <h3>数据中心</h3>
+    </center>
+    <div id="main" style="width: 600px;height:400px;"></div>
+</body>
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+
+
+    $.ajax({
+			"url":"http://127.0.0.1:5000/chart-data", //请求地址
+			"type":"get",  // http 请求方式，需按后端所定义的来
+			success:function(rep) {
+				// success 是 ajax 请求的成功回调方法，后端接口有返回数据时，success会自动执行
+				// console.log("后端响应:" + rep)
+                // 把从python 后端获取的 json 字符串转为 json对象
+                var jsonObject = JSON.parse(rep)
+                var domain = [];
+                var viewTime = [];
+                for (var i in jsonObject) {
+                    // i 是一个‘键’，所以要通过 jsonObject[i] 来取子元素
+                    domain.push(jsonObject[i].domain);
+                    viewTime.push(jsonObject[i].total_time)
+                }
+                console.log(domain, viewTime)
+                // 指定图表的配置项和数据
+                var option = {
+                    title: {
+                        text: '网站浏览统计'
+                    },
+                    tooltip: {},
+                    legend: {
+                        data:['分钟']
+                    },
+                    xAxis: {
+                        data: domain
+                    },
+                    yAxis: {},
+                    series: [{
+                        name: '分钟',
+                        type: 'bar',
+                        data: viewTime
+                    }]
+                };
+
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+				
+			},
+			error:function(err) {
+				// 前后端数据交互不成功时，会自定执行
+				alert("请求失败");
+			}
+		});
+
+        //函数中才能返回（return）
+        // return;
+
+
+
+
+</script>
+</html>
